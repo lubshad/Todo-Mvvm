@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Todo Mvvm</string>
+    <string name="add_task_button">add_task_button</string>
 </resources>
