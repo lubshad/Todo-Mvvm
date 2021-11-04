@@ -4,6 +4,8 @@ buildscript {
 
     ext {
         roomVersion = "2.3.0"
+        navigationVersion = "2.3.5"
+        junitVersion = "4.13.1"
     }
 
 
