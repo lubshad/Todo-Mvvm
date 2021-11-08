@@ -61,15 +61,10 @@ dependencies {
     implementation "com.google.dagger:hilt-android:$daggerHiltVersion"
     kapt "com.google.dagger:hilt-compiler:$daggerHiltVersion"
 
-   // Coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
-
 
     //ViewModel and livedata
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
-//    implementation "android.arch.lifecycle:common-java8:$lifecycleVersion"
 }
 
 kapt {

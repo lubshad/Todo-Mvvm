@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todomvvm.R
 import com.example.todomvvm.databinding.FragmentTasksBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.observeOn
 
 
 @AndroidEntryPoint
