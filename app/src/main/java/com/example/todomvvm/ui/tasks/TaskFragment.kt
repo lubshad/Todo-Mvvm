@@ -5,11 +5,13 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todomvvm.R
 import com.example.todomvvm.databinding.FragmentTasksBinding
+import com.example.todomvvm.utils.onQueryChanged
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -20,6 +22,7 @@ class TaskFragment : Fragment(R.layout.fragment_tasks) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
 
         val binding = FragmentTasksBinding.bind(view)
 
@@ -38,7 +41,15 @@ class TaskFragment : Fragment(R.layout.fragment_tasks) {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_fragment_tasks, menu)
+
+
+        val searchButton = menu.findItem(R.id.action_search)
+        val searchView = searchButton.actionView as SearchView
+
+        searchView.onQueryChanged {
+            viewModel.searchQuery.value = it
+        }
+
     }
 }
