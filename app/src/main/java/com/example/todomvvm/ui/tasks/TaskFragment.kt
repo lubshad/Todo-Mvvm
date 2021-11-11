@@ -4,6 +4,7 @@ import TaskAdapter
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
@@ -51,5 +52,21 @@ class TaskFragment : Fragment(R.layout.fragment_tasks) {
             viewModel.searchQuery.value = it
         }
 
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.action_sort_by_date-> {
+                viewModel.sortBy.value = SortBy.BY_DATE
+            }
+            R.id.action_sort_by_name-> {
+                viewModel.sortBy.value = SortBy.BY_NAME
+            }
+            R.id.action_hide_completed->{
+                item.isChecked = !item.isChecked
+                viewModel.hideCompleted.value = item.isChecked
+            }
+        }
+        return true
     }
 }
