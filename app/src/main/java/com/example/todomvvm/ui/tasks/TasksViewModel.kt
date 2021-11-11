@@ -1,10 +1,8 @@
 package com.example.todomvvm.ui.tasks
 
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.*
+import com.example.todomvvm.data.PreferenceManger
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.todomvvm.data.TaskDao
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,28 +10,40 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.combine
 
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.launch
 
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
-    private val taskDao: TaskDao
+    private val taskDao: TaskDao,
+    private val preferenceManger: PreferenceManger
 ) : ViewModel() {
 
     val searchQuery = MutableStateFlow("")
 
-    val sortBy = MutableStateFlow(SortBy.BY_DATE)
-    val hideCompleted = MutableStateFlow(false)
 
+    val preferencesFlow = preferenceManger.preferencesFlow
 
     val tasksFlow = combine(
         searchQuery,
-        sortBy,
-        hideCompleted
-    ) { query, sort, hideCompleted ->
-        Triple(query, sort, hideCompleted)
+        preferencesFlow
+    ) { query, filterPreferences ->
+        Pair(query, filterPreferences)
 
-    }.flatMapLatest { (query, sort, hideCompleted) ->
-        taskDao.getAllTasks(query, sort, hideCompleted)
+    }.flatMapLatest { (query, filterPreferences) ->
+        taskDao.getAllTasks(query, filterPreferences.sortBy, filterPreferences.hideCompleted)
+    }
+
+    fun changeSortOrder(sortOrder: SortBy) {
+        viewModelScope.launch {
+            preferenceManger.updateSortOrder(sortOrder)
+        }
+    }
+
+    fun changeHideCompleted(hideCompleted: Boolean) {
+        viewModelScope.launch {
+            preferenceManger.updateHideCompleted(hideCompleted)
+        }
     }
 
     val tasks = tasksFlow.asLiveData()

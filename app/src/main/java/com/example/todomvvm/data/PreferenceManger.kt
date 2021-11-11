@@ -43,8 +43,13 @@ class PreferenceManger @Inject constructor(
 
     suspend fun updateSortOrder(sortOrder : SortBy) {
         dataStore.edit { preferences ->
-            val currentCounterValue = preferences[EXAMPLE_COUNTER] ?: 0
-            preferences[EXAMPLE_COUNTER] = currentCounterValue + 1
+            preferences[PreferencesKeys.SORT_BY] = sortOrder.name
+        }
+    }
+
+    suspend fun updateHideCompleted(hideCompleted: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.HIDE_COMPLETED] = hideCompleted
         }
     }
 

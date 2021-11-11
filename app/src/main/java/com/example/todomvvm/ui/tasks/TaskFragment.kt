@@ -9,11 +9,14 @@ import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todomvvm.R
 import com.example.todomvvm.databinding.FragmentTasksBinding
 import com.example.todomvvm.utils.onQueryChanged
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -52,19 +55,24 @@ class TaskFragment : Fragment(R.layout.fragment_tasks) {
             viewModel.searchQuery.value = it
         }
 
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            menu.findItem(R.id.action_hide_completed).isChecked= viewModel.preferencesFlow.first().hideCompleted
+        }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             R.id.action_sort_by_date-> {
-                viewModel.sortBy.value = SortBy.BY_DATE
+                viewModel.changeSortOrder(SortBy.BY_DATE)
             }
             R.id.action_sort_by_name-> {
-                viewModel.sortBy.value = SortBy.BY_NAME
+                viewModel.changeSortOrder(SortBy.BY_NAME)
             }
             R.id.action_hide_completed->{
                 item.isChecked = !item.isChecked
-                viewModel.hideCompleted.value = item.isChecked
+                viewModel.changeHideCompleted(item.isChecked)
             }
         }
         return true
