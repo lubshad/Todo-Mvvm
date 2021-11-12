@@ -10,7 +10,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
-import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,21 +26,21 @@ class PreferenceManger @Inject constructor(
         .catch { exception ->
             if (exception is IOException) {
                 emit(emptyPreferences())
-            }
-            else {
+            } else {
                 throw exception
             }
             Log.i(TAG, exception.toString())
 
         }
         .map { preferences ->
-        val sortOrder = SortBy.valueOf(preferences[PreferencesKeys.SORT_BY] ?: SortBy.BY_DATE.name)
-        val hideCompleted = preferences[PreferencesKeys.HIDE_COMPLETED] ?: false
-        FilterPreferences(sortOrder, hideCompleted)
-    }
+            val sortOrder =
+                SortBy.valueOf(preferences[PreferencesKeys.SORT_BY] ?: SortBy.BY_DATE.name)
+            val hideCompleted = preferences[PreferencesKeys.HIDE_COMPLETED] ?: false
+            FilterPreferences(sortOrder, hideCompleted)
+        }
 
 
-    suspend fun updateSortOrder(sortOrder : SortBy) {
+    suspend fun updateSortOrder(sortOrder: SortBy) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SORT_BY] = sortOrder.name
         }

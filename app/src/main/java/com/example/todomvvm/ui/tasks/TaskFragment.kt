@@ -44,7 +44,8 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
                 layoutManager = LinearLayoutManager(requireContext())
             }
 
-            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            ItemTouchHelper(object :
+                ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
                 override fun onMove(
                     recyclerView: RecyclerView,
                     viewHolder: RecyclerView.ViewHolder,
@@ -55,9 +56,9 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
 //                    if (direction == ItemTouchHelper.LEFT) {
-                        val position = viewHolder.adapterPosition
-                        val task = taskAdapter.currentList[position]
-                        viewModel.onTaskSwiped(task)
+                    val position = viewHolder.adapterPosition
+                    val task = taskAdapter.currentList[position]
+                    viewModel.onTaskSwiped(task)
 //                    }
                 }
 
@@ -65,13 +66,22 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
 
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                viewModel.taskEventFlow.collect {event->
-                    when(event) {
+                viewModel.taskEventFlow.collect { event ->
+                    when (event) {
                         is TaskEvent.ShowUndoTaskMessage -> {
-                            Snackbar.make(requireView(), "Task Deleted", Snackbar.LENGTH_LONG)
-                             .setAction("UNDO" , View.OnClickListener {
-                                 viewModel.undoDeletedTask(event.task)
-                             })
+                            Snackbar.make(requireView(), "Task Deleted", Snackbar.LENGTH_INDEFINITE)
+                                .setAction("UNDO", View.OnClickListener {
+                                    viewModel.undoDeletedTask(event.task)
+                                })
+                                .show()
+                        }
+                        is TaskEvent.ShowUndoMultipleTasks -> {
+                            Snackbar.make(requireView(),
+                                "Multiple task Deleted",
+                                Snackbar.LENGTH_INDEFINITE)
+                                .setAction("UNDO", View.OnClickListener {
+                                    viewModel.undoMultipleTasks(event.tasks)
+                                })
                                 .show()
                         }
                     }
@@ -118,6 +128,9 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
             R.id.action_hide_completed -> {
                 item.isChecked = !item.isChecked
                 viewModel.changeHideCompleted(item.isChecked)
+            }
+            R.id.action_delete_completed -> {
+                viewModel.deleteAllCompleted()
             }
         }
         return true

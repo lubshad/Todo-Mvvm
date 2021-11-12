@@ -1,25 +1,27 @@
 package com.example.todomvvm.ui.tasks
 
 
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.example.todomvvm.data.PreferenceManger
 import com.example.todomvvm.data.Task
-import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.todomvvm.data.TaskDao
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
-import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
     private val taskDao: TaskDao,
-    private val preferenceManger: PreferenceManger
+    private val preferenceManger: PreferenceManger,
 ) : ViewModel() {
 
     val searchQuery = MutableStateFlow("")
@@ -31,6 +33,7 @@ class TasksViewModel @Inject constructor(
 
     val preferencesFlow = preferenceManger.preferencesFlow
 
+    @ExperimentalCoroutinesApi
     val tasksFlow = combine(
         searchQuery,
         preferencesFlow
@@ -60,15 +63,36 @@ class TasksViewModel @Inject constructor(
     }
 
     fun onTaskSwiped(task: Task) {
-          viewModelScope.launch {
-              taskDao.deleteTask(task)
-              taskEventChannel.send(TaskEvent.ShowUndoTaskMessage(task))
-          }
+        viewModelScope.launch {
+            taskDao.deleteTask(task)
+            taskEventChannel.send(TaskEvent.ShowUndoTaskMessage(task))
+        }
     }
 
     fun undoDeletedTask(task: Task) {
         viewModelScope.launch {
             taskDao.addTask(task)
+        }
+    }
+
+    fun deleteAllCompleted() {
+
+        val completedTasks = tasks.value?.filter { task ->
+            task.completed
+        }
+        viewModelScope.launch {
+            for (task in completedTasks!!) {
+                taskDao.deleteTask(task)
+            }
+            taskEventChannel.send(TaskEvent.ShowUndoMultipleTasks(completedTasks))
+        }
+    }
+
+    fun undoMultipleTasks(tasks: List<Task>) {
+        viewModelScope.launch {
+            for (task in tasks) {
+                taskDao.addTask(task)
+            }
         }
     }
 
@@ -82,5 +106,6 @@ enum class SortBy {
 
 
 sealed class TaskEvent {
-    data class ShowUndoTaskMessage(val task:Task) : TaskEvent()
+    data class ShowUndoTaskMessage(val task: Task) : TaskEvent()
+    data class ShowUndoMultipleTasks(val tasks: List<Task>) : TaskEvent()
 }
