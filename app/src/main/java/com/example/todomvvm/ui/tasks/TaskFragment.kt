@@ -10,12 +10,16 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.todomvvm.R
 import com.example.todomvvm.data.Task
 import com.example.todomvvm.databinding.FragmentTasksBinding
 import com.example.todomvvm.utils.onQueryChanged
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -35,10 +39,49 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
 
 
         binding.apply {
-            recyclerViewTaskList.adapter = taskAdapter
-            recyclerViewTaskList.layoutManager = LinearLayoutManager(requireContext())
+            recyclerViewTaskList.apply {
+                adapter = taskAdapter
+                layoutManager = LinearLayoutManager(requireContext())
+            }
 
+            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder,
+                ): Boolean {
+                    return true
+                }
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+//                    if (direction == ItemTouchHelper.LEFT) {
+                        val position = viewHolder.adapterPosition
+                        val task = taskAdapter.currentList[position]
+                        viewModel.onTaskSwiped(task)
+//                    }
+                }
+
+            }).attachToRecyclerView(recyclerViewTaskList)
+
+
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.taskEventFlow.collect {event->
+                    when(event) {
+                        is TaskEvent.ShowUndoTaskMessage -> {
+                            Snackbar.make(requireView(), "Task Deleted", Snackbar.LENGTH_LONG)
+                             .setAction("UNDO" , View.OnClickListener {
+                                 viewModel.undoDeletedTask(event.task)
+                             })
+                                .show()
+                        }
+                    }
+                }
+            }
         }
+
+
+
+
 
         viewModel.tasks.observe(viewLifecycleOwner) {
             taskAdapter.submitList(it)
@@ -58,20 +101,21 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
 
 
         viewLifecycleOwner.lifecycleScope.launch {
-            menu.findItem(R.id.action_hide_completed).isChecked= viewModel.preferencesFlow.first().hideCompleted
+            menu.findItem(R.id.action_hide_completed).isChecked =
+                viewModel.preferencesFlow.first().hideCompleted
         }
 
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
-            R.id.action_sort_by_date-> {
+        when (item.itemId) {
+            R.id.action_sort_by_date -> {
                 viewModel.changeSortOrder(SortBy.BY_DATE)
             }
-            R.id.action_sort_by_name-> {
+            R.id.action_sort_by_name -> {
                 viewModel.changeSortOrder(SortBy.BY_NAME)
             }
-            R.id.action_hide_completed->{
+            R.id.action_hide_completed -> {
                 item.isChecked = !item.isChecked
                 viewModel.changeHideCompleted(item.isChecked)
             }
