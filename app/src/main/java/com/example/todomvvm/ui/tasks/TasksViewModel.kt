@@ -80,11 +80,13 @@ class TasksViewModel @Inject constructor(
         val completedTasks = tasks.value?.filter { task ->
             task.completed
         }
-        viewModelScope.launch {
-            for (task in completedTasks!!) {
-                taskDao.deleteTask(task)
+        if (completedTasks!!.isNotEmpty()) {
+            viewModelScope.launch {
+                for (task in completedTasks) {
+                    taskDao.deleteTask(task)
+                }
+                taskEventChannel.send(TaskEvent.ShowUndoMultipleTasks(completedTasks))
             }
-            taskEventChannel.send(TaskEvent.ShowUndoMultipleTasks(completedTasks))
         }
     }
 
