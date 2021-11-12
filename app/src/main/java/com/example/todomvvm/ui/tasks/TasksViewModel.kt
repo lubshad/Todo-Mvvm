@@ -3,6 +3,7 @@ package com.example.todomvvm.ui.tasks
 
 import androidx.lifecycle.*
 import com.example.todomvvm.data.PreferenceManger
+import com.example.todomvvm.data.Task
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.todomvvm.data.TaskDao
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,6 +44,12 @@ class TasksViewModel @Inject constructor(
     fun changeHideCompleted(hideCompleted: Boolean) {
         viewModelScope.launch {
             preferenceManger.updateHideCompleted(hideCompleted)
+        }
+    }
+
+    fun changeCheckedStatus(task: Task) {
+        viewModelScope.launch {
+            taskDao.updateTask(task.copy(completed = !task.completed))
         }
     }
 

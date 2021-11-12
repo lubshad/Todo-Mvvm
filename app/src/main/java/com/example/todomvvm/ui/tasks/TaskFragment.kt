@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todomvvm.R
+import com.example.todomvvm.data.Task
 import com.example.todomvvm.databinding.FragmentTasksBinding
 import com.example.todomvvm.utils.onQueryChanged
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,7 +21,7 @@ import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
-class TaskFragment : Fragment(R.layout.fragment_tasks) {
+class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListener {
     private val viewModel: TasksViewModel by viewModels()
 
 
@@ -30,7 +31,7 @@ class TaskFragment : Fragment(R.layout.fragment_tasks) {
 
         val binding = FragmentTasksBinding.bind(view)
 
-        val taskAdapter = TaskAdapter()
+        val taskAdapter = TaskAdapter(this)
 
 
         binding.apply {
@@ -76,5 +77,13 @@ class TaskFragment : Fragment(R.layout.fragment_tasks) {
             }
         }
         return true
+    }
+
+    override fun onItemClick(task: Task) {
+
+    }
+
+    override fun onCheckboxClick(task: Task) {
+        viewModel.changeCheckedStatus(task)
     }
 }
