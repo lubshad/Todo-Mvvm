@@ -76,8 +76,10 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
                                 .show()
                         }
                         is TaskEvent.ShowUndoMultipleTasks -> {
+                            val message =
+                                if (event.tasks.size > 1) "Multiple task Deleted" else "Task Deleted"
                             Snackbar.make(requireView(),
-                                "Multiple task Deleted",
+                                message,
                                 Snackbar.LENGTH_INDEFINITE)
                                 .setAction("UNDO", View.OnClickListener {
                                     viewModel.undoMultipleTasks(event.tasks)
