@@ -40,6 +40,8 @@ const val DELETE_ALL_COMPLETED_RESULT_KEY = "delete_all_completed_result_key"
 class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListener {
     private val viewModel: TasksViewModel by viewModels()
 
+    private lateinit var searchView : SearchView
+
 
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -161,7 +163,13 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
 
 
         val searchButton = menu.findItem(R.id.action_search)
-        val searchView = searchButton.actionView as SearchView
+        searchView = searchButton.actionView as SearchView
+
+        val pendingQuery = viewModel.searchQuery.value
+        if (pendingQuery != null && pendingQuery.isNotBlank()) {
+            searchButton.expandActionView()
+            searchView.setQuery(pendingQuery, false)
+        }
 
         searchView.onQueryChanged {
             viewModel.searchQuery.value = it
@@ -200,5 +208,11 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
 
     override fun onCheckboxClick(task: Task) {
         viewModel.changeCheckedStatus(task)
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        searchView.setOnQueryTextListener(null)
     }
 }
