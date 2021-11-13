@@ -1,9 +1,7 @@
 package com.example.todomvvm.ui.tasks
 
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.todomvvm.data.PreferenceManger
 import com.example.todomvvm.data.Task
 import com.example.todomvvm.data.TaskDao
@@ -22,9 +20,10 @@ import javax.inject.Inject
 class TasksViewModel @Inject constructor(
     private val taskDao: TaskDao,
     private val preferenceManger: PreferenceManger,
+    private val state: SavedStateHandle,
 ) : ViewModel() {
 
-    val searchQuery = MutableStateFlow("")
+    val searchQuery = state.getLiveData<String>("searchQuery", "")
 
     private val taskEventChannel = Channel<TaskEvent>()
 
@@ -35,13 +34,21 @@ class TasksViewModel @Inject constructor(
 
     @ExperimentalCoroutinesApi
     val tasksFlow = combine(
-        searchQuery,
+        searchQuery.asFlow(),
         preferencesFlow
     ) { query, filterPreferences ->
         Pair(query, filterPreferences)
 
     }.flatMapLatest { (query, filterPreferences) ->
         taskDao.getAllTasks(query, filterPreferences.sortBy, filterPreferences.hideCompleted)
+    }
+
+    val tasks = tasksFlow.asLiveData()
+
+    fun navigateToAddTaskScreen() {
+        viewModelScope.launch {
+            taskEventChannel.send(TaskEvent.NavigateToAddTaskScreen)
+        }
     }
 
     fun changeSortOrder(sortOrder: SortBy) {
@@ -98,7 +105,13 @@ class TasksViewModel @Inject constructor(
         }
     }
 
-    val tasks = tasksFlow.asLiveData()
+    fun navigateToEditTaskFragment(task: Task) {
+        viewModelScope.launch {
+            taskEventChannel.send(TaskEvent.NavigateToEditTask(task))
+        }
+    }
+
+
 }
 
 enum class SortBy {
@@ -110,4 +123,6 @@ enum class SortBy {
 sealed class TaskEvent {
     data class ShowUndoTaskMessage(val task: Task) : TaskEvent()
     data class ShowUndoMultipleTasks(val tasks: List<Task>) : TaskEvent()
+    object NavigateToAddTaskScreen : TaskEvent()
+    data class NavigateToEditTask(val task: Task) : TaskEvent()
 }

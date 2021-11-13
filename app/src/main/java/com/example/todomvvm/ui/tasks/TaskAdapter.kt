@@ -26,7 +26,6 @@ class TaskAdapter(private val onClickListener: OnClickListener) :
                 root.setOnClickListener {
                     val position = adapterPosition
                     if (position != RecyclerView.NO_POSITION) {
-
                         val task = getItem(position)
                         onClickListener.onItemClick(task)
                     }
