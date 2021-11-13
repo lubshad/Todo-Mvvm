@@ -29,4 +29,11 @@
             android:defaultValue="Add Task"
             app:argType="string" />
     </fragment>
+    <dialog
+        android:id="@+id/confirmDialog"
+        android:name="com.example.todomvvm.ui.confirm_dialog.ConfirmDialog"
+        android:label="ConfirmDialog" />
+    <action
+        android:id="@+id/action_global_confirmDialog"
+        app:destination="@id/confirmDialog" />
 </navigation>

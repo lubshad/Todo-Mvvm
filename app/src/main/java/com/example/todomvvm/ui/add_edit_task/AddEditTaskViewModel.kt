@@ -21,7 +21,7 @@ class AddEditTaskViewModel @Inject constructor(
 ) : ViewModel() {
 
 
-    val addEditTaskChanel = Channel<AddEditTaskEvent>()
+    private val addEditTaskChanel = Channel<AddEditTaskEvent>()
 
     val addEditTaskEvent = addEditTaskChanel.receiveAsFlow()
 

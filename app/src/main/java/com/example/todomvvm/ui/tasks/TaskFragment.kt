@@ -22,6 +22,7 @@ import com.example.todomvvm.databinding.FragmentTasksBinding
 import com.example.todomvvm.utils.onQueryChanged
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -29,8 +30,10 @@ import kotlinx.coroutines.launch
 
 const val TASK_ADDED = Activity.RESULT_FIRST_USER
 const val TASK_EDITED = TASK_ADDED + 1
+const val DELETE_ALL_COMPLETED = TASK_EDITED + 1
 
 const val ADD_EDIT_RESULT_KEY = "add_edit_result_key"
+const val DELETE_ALL_COMPLETED_RESULT_KEY = "delete_all_completed_result_key"
 
 
 @AndroidEntryPoint
@@ -38,6 +41,7 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
     private val viewModel: TasksViewModel by viewModels()
 
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
@@ -52,6 +56,13 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
             viewModel.showAddEditTaskMessage(result)
 //            val message = if (result == TASK_ADDED) "Task Added" else "Task Updated"
 //            showMessage(message, requireView())
+        }
+
+        setFragmentResultListener(DELETE_ALL_COMPLETED_RESULT_KEY) { _, bundle ->
+            val result = bundle.get(DELETE_ALL_COMPLETED_RESULT_KEY) as Int
+            if (result == DELETE_ALL_COMPLETED) {
+                viewModel.deleteAllCompleted()
+            }
         }
 
 
@@ -118,6 +129,10 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
                         is TaskEvent.ShowAddEditTaskMessage -> {
                             showMessage(event.message, requireView())
                         }
+                        TaskEvent.ShowConfirmDeleteAllDialog -> {
+                            val action = TaskFragmentDirections.actionGlobalConfirmDialog()
+                            findNavController().navigate(action)
+                        }
                     }
                 }
             }
@@ -173,7 +188,7 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
                 viewModel.changeHideCompleted(item.isChecked)
             }
             R.id.action_delete_completed -> {
-                viewModel.deleteAllCompleted()
+                viewModel.showConfirmDeleteAllDialog()
             }
         }
         return true

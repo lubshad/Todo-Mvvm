@@ -19,10 +19,10 @@ import javax.inject.Inject
 class TasksViewModel @Inject constructor(
     private val taskDao: TaskDao,
     private val preferenceManger: PreferenceManger,
-    private val state: SavedStateHandle,
+    state: SavedStateHandle,
 ) : ViewModel() {
 
-    val searchQuery = state.getLiveData<String>("searchQuery", "")
+    val searchQuery = state.getLiveData("searchQuery", "")
 
     private val taskEventChannel = Channel<TaskEvent>()
 
@@ -42,6 +42,7 @@ class TasksViewModel @Inject constructor(
         taskDao.getAllTasks(query, filterPreferences.sortBy, filterPreferences.hideCompleted)
     }
 
+    @ExperimentalCoroutinesApi
     val tasks = tasksFlow.asLiveData()
 
     fun navigateToAddTaskScreen() {
@@ -81,6 +82,7 @@ class TasksViewModel @Inject constructor(
         }
     }
 
+    @ExperimentalCoroutinesApi
     fun deleteAllCompleted() {
 
         val completedTasks = tasks.value?.filter { task ->
@@ -119,6 +121,12 @@ class TasksViewModel @Inject constructor(
         }
     }
 
+    fun showConfirmDeleteAllDialog() {
+        viewModelScope.launch {
+            taskEventChannel.send(TaskEvent.ShowConfirmDeleteAllDialog)
+        }
+    }
+
 
 }
 
@@ -134,4 +142,5 @@ sealed class TaskEvent {
     object NavigateToAddTaskScreen : TaskEvent()
     data class NavigateToEditTask(val task: Task) : TaskEvent()
     data class ShowAddEditTaskMessage(val message: String) : TaskEvent()
+    object ShowConfirmDeleteAllDialog : TaskEvent()
 }
