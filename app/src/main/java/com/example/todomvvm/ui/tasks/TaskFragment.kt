@@ -1,6 +1,7 @@
 package com.example.todomvvm.ui.tasks
 
 import TaskAdapter
+import android.app.Activity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -8,6 +9,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -25,6 +27,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 
+const val TASK_ADDED = Activity.RESULT_FIRST_USER
+const val TASK_EDITED = TASK_ADDED + 1
+
+const val ADD_EDIT_RESULT_KEY = "add_edit_result_key"
+
+
 @AndroidEntryPoint
 class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListener {
     private val viewModel: TasksViewModel by viewModels()
@@ -37,6 +45,15 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
         val binding = FragmentTasksBinding.bind(view)
 
         val taskAdapter = TaskAdapter(this)
+
+
+        setFragmentResultListener(ADD_EDIT_RESULT_KEY) { _, bundle ->
+            val result = bundle.get(ADD_EDIT_RESULT_KEY) as Int
+            viewModel.showAddEditTaskMessage(result)
+//            val message = if (result == TASK_ADDED) "Task Added" else "Task Updated"
+//            showMessage(message, requireView())
+        }
+
 
 
         binding.apply {
@@ -98,6 +115,9 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
                                     title = "Edit Task")
                             findNavController().navigate(action)
                         }
+                        is TaskEvent.ShowAddEditTaskMessage -> {
+                            showMessage(event.message, requireView())
+                        }
                     }
                 }
             }
@@ -115,6 +135,10 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TaskAdapter.OnClickListe
         viewModel.tasks.observe(viewLifecycleOwner) {
             taskAdapter.submitList(it)
         }
+    }
+
+    private fun showMessage(message: String, view: View) {
+        Snackbar.make(view, message, Snackbar.LENGTH_LONG).show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

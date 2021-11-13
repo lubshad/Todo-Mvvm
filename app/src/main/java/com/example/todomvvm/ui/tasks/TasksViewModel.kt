@@ -8,7 +8,6 @@ import com.example.todomvvm.data.TaskDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -111,6 +110,15 @@ class TasksViewModel @Inject constructor(
         }
     }
 
+    fun showAddEditTaskMessage(result: Int) {
+        viewModelScope.launch {
+            val message = if (result == TASK_ADDED) "Task Added" else "Task Edited"
+            taskEventChannel.send(
+                TaskEvent.ShowAddEditTaskMessage(message)
+            )
+        }
+    }
+
 
 }
 
@@ -125,4 +133,5 @@ sealed class TaskEvent {
     data class ShowUndoMultipleTasks(val tasks: List<Task>) : TaskEvent()
     object NavigateToAddTaskScreen : TaskEvent()
     data class NavigateToEditTask(val task: Task) : TaskEvent()
+    data class ShowAddEditTaskMessage(val message: String) : TaskEvent()
 }

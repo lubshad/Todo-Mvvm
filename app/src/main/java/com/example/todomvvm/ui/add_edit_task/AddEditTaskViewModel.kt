@@ -5,7 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todomvvm.data.Task
 import com.example.todomvvm.data.TaskDao
-import com.google.android.material.snackbar.Snackbar
+import com.example.todomvvm.ui.tasks.TASK_ADDED
+import com.example.todomvvm.ui.tasks.TASK_EDITED
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -45,9 +46,8 @@ class AddEditTaskViewModel @Inject constructor(
         if (task != null) {
             val updatedTask = task.copy(name = taskName, important = important)
             updateTask(updatedTask)
-        }
-        else {
-            val newTask = Task(name = taskName , important = important)
+        } else {
+            val newTask = Task(name = taskName, important = important)
             addNewTask(newTask)
         }
     }
@@ -61,18 +61,20 @@ class AddEditTaskViewModel @Inject constructor(
     private fun addNewTask(newTask: Task) {
         viewModelScope.launch {
             taskDao.addTask(newTask)
+            addEditTaskChanel.send(AddEditTaskEvent.NavigateBackWithResult(TASK_ADDED))
         }
     }
 
     private fun updateTask(updatedTask: Task) {
-            viewModelScope.launch {
-                taskDao.updateTask(updatedTask)
-            }
+        viewModelScope.launch {
+            taskDao.updateTask(updatedTask)
+            addEditTaskChanel.send(AddEditTaskEvent.NavigateBackWithResult(TASK_EDITED))
+        }
     }
 
 }
 
 sealed class AddEditTaskEvent {
-    data class ShowInvalidInputMessage(val message: String): AddEditTaskEvent()
-
+    data class ShowInvalidInputMessage(val message: String) : AddEditTaskEvent()
+    data class NavigateBackWithResult(val result: Int) : AddEditTaskEvent()
 }
