@@ -1,6 +1,7 @@
 package com.example.todomvvm.ui.tasks
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -13,6 +14,7 @@ import com.example.todomvvm.databinding.FragmentTasksBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 
 
@@ -46,8 +48,9 @@ class TaskFragment : Fragment(R.layout.fragment_tasks) {
         }
 
 
-
-
+        viewModel.tasks.observe(viewLifecycleOwner) {
+            tasksAdapter.submitList(it)
+        }
 
     }
 

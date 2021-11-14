@@ -1,5 +1,6 @@
 package com.example.todomvvm
 
+import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -24,10 +25,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideTaskDatabase(
-        @ApplicationContext appContext: Context,
+        app:Application,
         callback: TaskDatabase.Callback
     ) :TaskDatabase {
-        return Room.databaseBuilder(appContext, TaskDatabase::class.java, "task_database")
+        return Room.databaseBuilder(app, TaskDatabase::class.java, "task_database")
             .fallbackToDestructiveMigration()
             .addCallback(callback)
             .build()

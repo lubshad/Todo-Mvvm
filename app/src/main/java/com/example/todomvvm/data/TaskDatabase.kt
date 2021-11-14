@@ -10,7 +10,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 
-@Database(entities = [Task::class], version = 0)
+@Database(entities = [Task::class], version = 1)
 abstract class TaskDatabase : RoomDatabase() {
 
     abstract fun taskDao(): TaskDao
@@ -18,7 +18,7 @@ abstract class TaskDatabase : RoomDatabase() {
 
     class Callback @Inject constructor(
         private val taskDatabase: Provider<TaskDatabase>,
-        @ApplicationScope private val applicationScope: CoroutineScope
+        @ApplicationScope private val applicationScope: CoroutineScope,
     ) : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)

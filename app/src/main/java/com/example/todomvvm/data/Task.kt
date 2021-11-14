@@ -9,6 +9,6 @@ data class Task(
     val taskName: String,
     val important: Boolean = false,
     val completed: Boolean = false,
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 )
