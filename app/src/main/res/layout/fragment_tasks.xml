@@ -8,15 +8,13 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_tasks"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:itemCount="20"
-        tools:listitem="@layout/task_item" />
+        android:layout_height="match_parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_task"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
+        android:layout_gravity="bottom|end"
         android:layout_margin="10dp"
         android:src="@drawable/ic_add" />
 
