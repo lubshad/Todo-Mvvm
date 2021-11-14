@@ -40,15 +40,18 @@ class AddEditTaskViewModel @Inject constructor(
         }
 
     fun onSaveButtonClick() {
-        if (taskName.isBlank()) {
-            showEmptyTaskNameMessage()
-        }
-        if (task != null) {
-            val updatedTask = task.copy(name = taskName, important = important)
-            updateTask(updatedTask)
-        } else {
-            val newTask = Task(name = taskName, important = important)
-            addNewTask(newTask)
+        when {
+            taskName.isBlank() -> {
+                showEmptyTaskNameMessage()
+            }
+            task != null -> {
+                val updatedTask = task.copy(name = taskName, important = important)
+                updateTask(updatedTask)
+            }
+            else -> {
+                val newTask = Task(name = taskName, important = important)
+                addNewTask(newTask)
+            }
         }
     }
 
