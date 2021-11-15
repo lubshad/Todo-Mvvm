@@ -34,20 +34,19 @@ class TaskFragment : Fragment(R.layout.fragment_tasks) {
             }
 
 
-
-
             fabAddTask.setOnClickListener {
                 viewModel.navigateToAddTaskScreen()
             }
         }
 
 
-        viewModel.tasks.observe(viewLifecycleOwner) {
-            tasksAdapter.submitList(it)
-        }
-
-
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+
+
+            viewModel.tasks.observe(viewLifecycleOwner) {
+                tasksAdapter.submitList(it)
+            }
+
             viewModel.taskEventFlow.collect { event ->
                 when (event) {
                     TaskEvent.NavigateToAddTaskScreen -> {
