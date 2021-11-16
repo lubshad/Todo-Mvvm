@@ -9,11 +9,28 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.todomvvm.data.Task
 import com.example.todomvvm.databinding.TaskItemBinding
 
-class TasksAdapter() : ListAdapter<Task, TasksAdapter.TaskViewHolder>(DiffCallback()) {
+class TasksAdapter(val onItemClickListener: OnItemClickListener) :
+    ListAdapter<Task, TasksAdapter.TaskViewHolder>(DiffCallback()) {
 
 
     inner class TaskViewHolder(private val binding: TaskItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            binding.apply {
+                checkboxCompleted.setOnCheckedChangeListener { _, value ->
+                    val position = adapterPosition
+                    val task = getItem(position)
+                    onItemClickListener.onCheckboxClick(task, value)
+                }
+                root.setOnClickListener {
+                    val position = adapterPosition
+                    val task = getItem(position)
+                    onItemClickListener.onItemClick(task)
+                }
+            }
+        }
+
         fun bind(currentItem: Task) {
             binding.apply {
                 textTaskName.text = currentItem.taskName
@@ -25,7 +42,7 @@ class TasksAdapter() : ListAdapter<Task, TasksAdapter.TaskViewHolder>(DiffCallba
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-        val binding = TaskItemBinding.inflate(LayoutInflater.from(parent.context), parent , false)
+        val binding = TaskItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return TaskViewHolder(binding)
     }
 
@@ -44,6 +61,11 @@ class TasksAdapter() : ListAdapter<Task, TasksAdapter.TaskViewHolder>(DiffCallba
             return oldItem == newItem
         }
 
+    }
+
+    interface OnItemClickListener {
+        fun onItemClick(task: Task)
+        fun onCheckboxClick(task: Task, value: Boolean)
     }
 
 }

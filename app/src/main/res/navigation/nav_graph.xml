@@ -23,5 +23,10 @@
             android:name="title"
             app:argType="string"
             android:defaultValue="Add Task" />
+        <argument
+            android:name="task"
+            app:argType="com.example.todomvvm.data.Task"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
 </navigation>

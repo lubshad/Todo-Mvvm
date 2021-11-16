@@ -3,6 +3,7 @@ package com.example.todomvvm.ui.tasks
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.todomvvm.data.Task
 import com.example.todomvvm.data.TaskDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -13,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TaskFragmentViewModel @Inject constructor(
-    taskDao: TaskDao,
+    val taskDao: TaskDao,
 ) : ViewModel() {
     fun navigateToAddTaskScreen() {
         viewModelScope.launch {
@@ -28,7 +29,7 @@ class TaskFragmentViewModel @Inject constructor(
                 showTaskEventMessage(message)
             }
             TASK_EDITED -> {
-                val message = "Task Added"
+                val message = "Task Edited"
                 showTaskEventMessage(message)
             }
         }
@@ -41,6 +42,18 @@ class TaskFragmentViewModel @Inject constructor(
 
     }
 
+    fun onItemClick(task: Task) {
+        viewModelScope.launch {
+            taskEventChanel.send(TaskEvent.NavigateToEditTaskScreen(task))
+        }
+    }
+
+    fun onCheckBoxClick(task: Task, value: Boolean) {
+        viewModelScope.launch {
+            taskDao.updateTask(task.copy(completed = value))
+        }
+    }
+
 
     val tasks = taskDao.getAllTasks().asLiveData()
 
@@ -51,5 +64,6 @@ class TaskFragmentViewModel @Inject constructor(
 
 sealed class TaskEvent {
     object NavigateToAddTaskScreen : TaskEvent()
+    data class NavigateToEditTaskScreen(val task: Task) : TaskEvent()
     data class ShowTaskEventMessage(val message: String) : TaskEvent()
 }
