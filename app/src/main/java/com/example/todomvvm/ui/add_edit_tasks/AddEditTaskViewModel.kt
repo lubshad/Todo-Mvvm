@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todomvvm.data.Task
 import com.example.todomvvm.data.TaskDao
+import com.example.todomvvm.ui.tasks.TaskEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 
 
 @HiltViewModel
@@ -19,8 +21,12 @@ class AddEditTaskViewModel @Inject constructor(
         const val TAG = "AddEditTaskViewModel"
     }
 
+
+    val addEditTaskEventChannel = Channel<AddEditTaskEvent>()
+
+    val addEditTaskEventFlow = addEditTaskEventChannel.receiveAsFlow()
+
     fun addNewTask() {
-        if (taskName.value != "") {
             val newTask = Task(
                 taskName = taskName.value!!,
                 important = important.value!!
@@ -28,13 +34,32 @@ class AddEditTaskViewModel @Inject constructor(
             viewModelScope.launch {
                 taskDao.addTask(newTask)
             }
-        } else {
+    }
+
+    fun onSaveButtonClick() {
+        when {
+            taskName.value == "" -> {
+                showEmptyTaskMessage()
+            }
+            else -> {
+                addNewTask()
+            }
 
         }
+    }
+
+    private fun showEmptyTaskMessage() {
+
     }
 
     val taskName = MutableLiveData("")
     val important = MutableLiveData(false)
 
 
+}
+
+
+sealed class AddEditTaskEvent {
+    object ShowEmptyTaskMessage : AddEditTaskEvent()
+    object NavigateBackToTaskListingScreen: AddEditTaskEvent()
 }

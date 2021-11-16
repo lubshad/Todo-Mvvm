@@ -4,9 +4,13 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.todomvvm.R
 import com.example.todomvvm.databinding.FragmentAddEditTaskBinding
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -35,8 +39,30 @@ class AddEditTaskFragment : Fragment(R.layout.fragment_add_edit_task) {
                 }
             }
             fabAddEditTask.setOnClickListener {
-                viewModel.addNewTask()
+                viewModel.onSaveButtonClick()
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.addEditTaskEventFlow.collect{ event ->
+                when(event) {
+                    is AddEditTaskEvent.ShowEmptyTaskMessage-> {
+                        showEmptyTaskNameMessage(requireView())
+                    }
+                    is AddEditTaskEvent.NavigateBackToTaskListingScreen -> {
+                          navigateBackToTaskListingScreen()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun navigateBackToTaskListingScreen() {
+        FragmentManager.setFragmentResult()
+        findNavController().navigateUp()
+    }
+
+    private fun showEmptyTaskNameMessage(view: View) {
+        Snackbar.make(view , "Task name is Empty" , Snackbar.LENGTH_LONG).show()
     }
 }
