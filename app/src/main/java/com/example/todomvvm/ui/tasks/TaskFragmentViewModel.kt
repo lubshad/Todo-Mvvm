@@ -21,6 +21,27 @@ class TaskFragmentViewModel @Inject constructor(
         }
     }
 
+    fun onAddEditTaskResult(result: Int) {
+        when (result) {
+            TASK_ADDED -> {
+                val message = "Task Added"
+                showTaskEventMessage(message)
+            }
+            TASK_EDITED -> {
+                val message = "Task Added"
+                showTaskEventMessage(message)
+            }
+        }
+    }
+
+    private fun showTaskEventMessage(message: String) {
+        viewModelScope.launch {
+            taskEventChanel.send(TaskEvent.ShowTaskEventMessage(message))
+        }
+
+    }
+
+
     val tasks = taskDao.getAllTasks().asLiveData()
 
     private val taskEventChanel = Channel<TaskEvent>()
@@ -30,4 +51,5 @@ class TaskFragmentViewModel @Inject constructor(
 
 sealed class TaskEvent {
     object NavigateToAddTaskScreen : TaskEvent()
+    data class ShowTaskEventMessage(val message: String) : TaskEvent()
 }
