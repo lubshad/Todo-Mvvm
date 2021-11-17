@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,7 +26,7 @@ class TaskFragmentViewModel @Inject constructor(
         const val TAG = "TaskFragmentViewModel"
     }
 
-    private val hideCompleted = MutableLiveData(false)
+    val hideCompleted = MutableLiveData(false)
 
     private val searchKey = MutableLiveData("")
 
@@ -111,12 +112,13 @@ class TaskFragmentViewModel @Inject constructor(
 
 
     private val taskFlow = combine(
-        searchKey, sortBy, hideCompleted
+        searchKey.asFlow(), sortBy.asFlow(), hideCompleted.asFlow()
     ) { searchKey, sortBy, hideCompleted ->
         Triple(searchKey, sortBy, hideCompleted)
     }.flatMapLatest { (searchKey, sortBy, hideCompleted) ->
         taskDao.getAllTasks(hideCompleted, sortBy, searchKey)
     }
+
 
 
     val tasks = taskFlow.asLiveData()

@@ -24,8 +24,6 @@ const val ADD_EDIT_TASK_REQUEST = "add_edit_task_request"
 
 const val TASK_ADDED = Activity.RESULT_FIRST_USER
 const val TASK_EDITED = TASK_ADDED + 1
-const val SORT_BY_DATE = 1
-const val SORT_BY_NAME = 2
 
 @AndroidEntryPoint
 class TaskFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClickListener {
@@ -102,12 +100,15 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClick
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.fragment_tasks_menu, menu)
-
+        viewModel.hideCompleted.observe(viewLifecycleOwner) {
+            val checkboxHideCompleted = menu.findItem(R.id.action_hide_all_completed)
+            checkboxHideCompleted.isChecked = viewModel.hideCompleted.value!!
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
-            R.id.action_sort_by_date ->{
+        when (item.itemId) {
+            R.id.action_sort_by_date -> {
                 viewModel.sortByDate()
             }
             R.id.action_sort_by_name -> {
