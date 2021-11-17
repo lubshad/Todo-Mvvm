@@ -1,14 +1,15 @@
 package com.example.todomvvm.ui.tasks
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import android.util.Log
+import androidx.lifecycle.*
 import com.example.todomvvm.ApplicationScope
+import com.example.todomvvm.data.SortBy
 import com.example.todomvvm.data.Task
 import com.example.todomvvm.data.TaskDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,6 +20,18 @@ class TaskFragmentViewModel @Inject constructor(
     val taskDao: TaskDao,
     @ApplicationScope val applicationScope: CoroutineScope,
 ) : ViewModel() {
+
+    companion object {
+        const val TAG = "TaskFragmentViewModel"
+    }
+
+    private val hideCompleted = MutableLiveData(false)
+
+    private val searchKey = MutableLiveData("")
+
+    private val sortBy = MutableLiveData(SortBy.SORT_BY_DATE)
+
+
     fun navigateToAddTaskScreen() {
         viewModelScope.launch {
             taskEventChanel.send(TaskEvent.NavigateToAddTaskScreen)
@@ -58,15 +71,17 @@ class TaskFragmentViewModel @Inject constructor(
     }
 
     fun sortByDate() {
-        TODO("Not yet implemented")
+        sortBy.value = SortBy.SORT_BY_DATE
+        Log.i(TAG, "Sort By Date")
     }
 
     fun sortByName() {
-        TODO("Not yet implemented")
+        sortBy.value = SortBy.SORT_BY_NAME
+        Log.i(TAG, "Sort By Name")
     }
 
     fun hideCompleted() {
-        TODO("Not yet implemented")
+        hideCompleted.value = !hideCompleted.value!!
     }
 
     fun deleteCompleted() {
@@ -94,7 +109,17 @@ class TaskFragmentViewModel @Inject constructor(
     }
 
 
-    val tasks = taskDao.getAllTasks().asLiveData()
+
+    private val taskFlow = combine(
+        searchKey, sortBy, hideCompleted
+    ) { searchKey, sortBy, hideCompleted ->
+        Triple(searchKey, sortBy, hideCompleted)
+    }.flatMapLatest { (searchKey, sortBy, hideCompleted) ->
+        taskDao.getAllTasks(hideCompleted, sortBy, searchKey)
+    }
+
+
+    val tasks = taskFlow.asLiveData()
 
     private val taskEventChanel = Channel<TaskEvent>()
 

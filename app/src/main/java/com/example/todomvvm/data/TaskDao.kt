@@ -7,9 +7,24 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TaskDao {
 
-    //Get all Tasks
-    @Query("SELECT * FROM task_table")
-    fun getAllTasks(): Flow<List<Task>>
+
+    fun getAllTasks(hideCompleted: Boolean, sortBy: SortBy, searchKey: String): Flow<List<Task>> {
+        return when(sortBy) {
+            SortBy.SORT_BY_DATE -> {
+                getTasksByDateCreated(hideCompleted, searchKey)
+            }
+            SortBy.SORT_BY_NAME -> {
+                getTasksByName(hideCompleted, searchKey)
+            }
+        }
+    }
+
+
+    @Query("SELECT * FROM task_table WHERE (completed != :hideCompleted OR completed = 0) AND taskName  LIKE '%' || :searchKey || '%' ORDER BY  created ASC")
+    fun getTasksByDateCreated(hideCompleted: Boolean, searchKey: String) :Flow<List<Task>>
+
+    @Query("SELECT * FROM task_table WHERE (completed != :hideCompleted OR completed = 0) AND taskName  LIKE '%' || :searchKey || '%' ORDER BY  taskName ASC")
+    fun getTasksByName(hideCompleted: Boolean, searchKey: String) :Flow<List<Task>>
 
     // Add Task
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -24,4 +39,11 @@ interface TaskDao {
     suspend fun deleteTask(task: Task)
 
 
+}
+
+
+
+enum class SortBy {
+    SORT_BY_DATE,
+    SORT_BY_NAME
 }
