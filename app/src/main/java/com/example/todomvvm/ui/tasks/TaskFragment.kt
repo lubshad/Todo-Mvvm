@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
@@ -68,6 +69,9 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClick
                     is TaskEvent.NavigateToEditTaskScreen -> {
                         navigateToEditTaskScreen(event.task)
                     }
+                    is TaskEvent.ShowUndoDeletedMessage -> {
+                        showUndoDeletedMessage(event.deletedTasks)
+                    }
                 }
             }
         }
@@ -84,9 +88,36 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClick
 
     }
 
+    private fun showUndoDeletedMessage(deletedTasks: List<Task>) {
+        val message = if (deletedTasks.size > 1) "Multiple Task Deleted" else "Task Deleted"
+        Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG)
+            .setAction("UNDO") {
+                viewModel.undoDeletedTasks(deletedTasks)
+            }
+            .show()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.fragment_tasks_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.action_sort_by_date ->{
+                viewModel.sortByDate()
+            }
+            R.id.action_sort_by_name -> {
+                viewModel.sortByName()
+            }
+            R.id.action_hide_all_completed -> {
+                viewModel.hideCompleted()
+            }
+            R.id.action_delete_all_completed -> {
+                viewModel.deleteCompleted()
+            }
+        }
+        return true
     }
 
     private fun navigateToEditTaskScreen(task: Task) {
