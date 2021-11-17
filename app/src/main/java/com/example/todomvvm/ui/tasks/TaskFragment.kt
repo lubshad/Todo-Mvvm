@@ -2,6 +2,8 @@ package com.example.todomvvm.ui.tasks
 
 import android.app.Activity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
@@ -32,6 +34,7 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClick
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
 
         binding = FragmentTasksBinding.bind(view)
         tasksAdapter = TasksAdapter(this)
@@ -79,6 +82,11 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClick
             viewModel.onAddEditTaskResult(result)
         }
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_tasks_menu, menu)
     }
 
     private fun navigateToEditTaskScreen(task: Task) {
