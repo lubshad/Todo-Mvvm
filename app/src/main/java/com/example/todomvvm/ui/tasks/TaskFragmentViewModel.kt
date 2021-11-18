@@ -28,7 +28,7 @@ class TaskFragmentViewModel @Inject constructor(
 
     val hideCompleted = MutableLiveData(false)
 
-    private val searchKey = MutableLiveData("")
+    val searchKey = MutableLiveData("")
 
     private val sortBy = MutableLiveData(SortBy.SORT_BY_DATE)
 
@@ -87,12 +87,15 @@ class TaskFragmentViewModel @Inject constructor(
 
     fun deleteCompleted() {
         val completedTasks = tasks.value!!.filter { task -> task.completed }
+        if (completedTasks.isNotEmpty()) {
+
         applicationScope.launch {
             for (task in completedTasks) {
                 taskDao.deleteTask(task)
             }
         }
-        showUndoDeletedMessage(completedTasks)
+            showUndoDeletedMessage(completedTasks)
+        }
     }
 
     private fun showUndoDeletedMessage(deletedTasks: List<Task>) {

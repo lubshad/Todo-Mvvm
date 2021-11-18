@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todomvvm.R
 import com.example.todomvvm.data.Task
 import com.example.todomvvm.databinding.FragmentTasksBinding
+import com.example.todomvvm.utils.onQueryTextChanged
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -103,6 +104,11 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClick
         viewModel.hideCompleted.observe(viewLifecycleOwner) {
             val checkboxHideCompleted = menu.findItem(R.id.action_hide_all_completed)
             checkboxHideCompleted.isChecked = viewModel.hideCompleted.value!!
+        }
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as androidx.appcompat.widget.SearchView
+        searchView.onQueryTextChanged { query ->
+            viewModel.searchKey.value = query
         }
     }
 
