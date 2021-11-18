@@ -2,7 +2,11 @@
   <code_scheme name="Project" version="173">
     <JetCodeStyleSettings>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <option name="CODE_STYLE_DEFAULTS" value="KOTLIN_OFFICIAL" />
+=======
+      <option name="ALLOW_TRAILING_COMMA" value="true" />
+>>>>>>> rebuild
 =======
       <option name="ALLOW_TRAILING_COMMA" value="true" />
 >>>>>>> rebuild
@@ -121,9 +125,12 @@
       </arrangement>
     </codeStyleSettings>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <codeStyleSettings language="kotlin">
       <option name="CODE_STYLE_DEFAULTS" value="KOTLIN_OFFICIAL" />
     </codeStyleSettings>
+=======
+>>>>>>> rebuild
 =======
 >>>>>>> rebuild
   </code_scheme>
