@@ -112,6 +112,12 @@ class TaskFragmentViewModel @Inject constructor(
         }
     }
 
+    fun deleteTask(task: Task?) {
+        viewModelScope.launch {
+            taskDao.deleteTask(task!!)
+            showUndoDeletedMessage(deletedTasks = listOf(task))
+        }
+    }
 
 
     private val taskFlow = combine(

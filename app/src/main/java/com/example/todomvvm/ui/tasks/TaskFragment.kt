@@ -6,12 +6,16 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchUIUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.todomvvm.R
 import com.example.todomvvm.data.Task
 import com.example.todomvvm.databinding.FragmentTasksBinding
@@ -33,6 +37,7 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClick
 
     private lateinit var binding: FragmentTasksBinding
     private lateinit var tasksAdapter: TasksAdapter
+    private lateinit var searchView: SearchView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -46,6 +51,20 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClick
                 layoutManager = LinearLayoutManager(requireContext())
                 adapter = tasksAdapter
             }
+
+
+            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT){
+                override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                    return false
+                }
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    val position = viewHolder.adapterPosition
+                    val task = tasksAdapter.currentList[position]
+                    viewModel.deleteTask(task)
+                }
+
+            }).attachToRecyclerView(recyclerViewTasks)
 
 
             fabAddTask.setOnClickListener {
@@ -88,6 +107,10 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClick
         }
 
     }
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        searchView.setOnQueryTextListener(null)
+//    }
 
     private fun showUndoDeletedMessage(deletedTasks: List<Task>) {
         val message = if (deletedTasks.size > 1) "Multiple Task Deleted" else "Task Deleted"
@@ -106,7 +129,15 @@ class TaskFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClick
             checkboxHideCompleted.isChecked = viewModel.hideCompleted.value!!
         }
         val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as androidx.appcompat.widget.SearchView
+        searchView = searchItem.actionView as SearchView
+
+        val pendingQuery = viewModel.searchKey.value
+
+        if (pendingQuery != null && pendingQuery.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView.setQuery(pendingQuery, false)
+        }
+
         searchView.onQueryTextChanged { query ->
             viewModel.searchKey.value = query
         }
